@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work Log — Well-Being Promotion Office</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+/* ── tokens ─────────────────────────────────────────────── */
+:root{
+  --ink:#16202b;
+  --ink-2:#41505f;
+  --ink-3:#7a8794;
+  --paper:#e9ece6;          /* pale ash — washi-adjacent */
+  --card:#fafbf7;
+  --card-2:#f2f4ee;
+  --rule:#ccd2c8;
+  --rule-soft:#dfe4da;
+  --seal:#b23a26;           /* hanko vermilion — used only for "today" */
+
+  --c-course:#2c6b8a;
+  --c-research:#7b3f6e;
+  --c-training:#a05f1d;
+  --c-pd:#3c6a45;
+
+  --f-display:"Newsreader",ui-serif,Georgia,serif;
+  --f-body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+
+  --r:3px;
+  --shadow:0 1px 2px rgba(22,32,43,.06),0 8px 24px -12px rgba(22,32,43,.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none;padding:0}
+:focus-visible{outline:2px solid var(--seal);outline-offset:2px;border-radius:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* ── shell ──────────────────────────────────────────────── */
+.masthead{
+  border-bottom:1px solid var(--rule);
+  padding:14px 22px 12px;
+  display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;
+  background:var(--paper);
+  position:sticky;top:0;z-index:40;
+}
+.brand{display:flex;flex-direction:column;gap:1px;margin-right:auto}
+.brand .eyebrow{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.brand h1{
+  font-family:var(--f-display);font-weight:400;font-size:25px;
+  margin:0;letter-spacing:-.01em;line-height:1.1;
+}
+.brand h1 em{font-style:italic;color:var(--ink-2)}
+
+.viewswitch{display:flex;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;background:var(--card)}
+.viewswitch button{
+  padding:6px 13px;font-size:12px;font-weight:500;color:var(--ink-2);
+  border-right:1px solid var(--rule-soft);
+}
+.viewswitch button:last-child{border-right:none}
+.viewswitch button[aria-pressed="true"]{background:var(--ink);color:var(--card)}
+
+.btn{
+  border:1px solid var(--rule);background:var(--card);border-radius:var(--r);
+  padding:6px 12px;font-size:12.5px;font-weight:500;color:var(--ink-2);
+  transition:background .12s,border-color .12s;
+}
+.btn:hover{background:var(--card-2);border-color:var(--ink-3)}
+.btn-solid{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.btn-solid:hover{background:#243342;color:var(--card)}
+.btn-sm{padding:3px 9px;font-size:11.5px}
+.btn-ghost{border-color:transparent;background:none}
+.btn-ghost:hover{background:var(--card-2);border-color:var(--rule-soft)}
+
+.layout{display:grid;grid-template-columns:246px minmax(0,1fr);gap:0;min-height:calc(100vh - 64px)}
+.rail{border-right:1px solid var(--rule);padding:18px 16px 60px}
+.stage{padding:18px 22px 70px;min-width:0}
+
+/* ── rail ───────────────────────────────────────────────── */
+.rail-h{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;
+}
+.rail-sec{margin-bottom:24px}
+.tally{display:flex;flex-direction:column;gap:9px}
+.tally-row{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:baseline}
+.tally-row .label{font-size:12.5px;font-weight:500}
+.tally-row .val{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
+.tally-row .track{grid-column:1/-1;height:3px;background:var(--rule-soft);border-radius:2px;overflow:hidden}
+.tally-row .fill{height:100%;border-radius:2px;transition:width .35s ease}
+
+.clist{display:flex;flex-direction:column;gap:2px}
+.citem{
+  display:grid;grid-template-columns:3px 1fr auto;gap:8px;align-items:center;
+  padding:5px 6px 5px 0;border-radius:var(--r);width:100%;text-align:left;
+}
+.citem:hover{background:var(--card-2)}
+.citem .bar{width:3px;height:100%;min-height:20px;border-radius:2px}
+.citem .nm{font-size:12.5px;line-height:1.3;overflow:hidden;text-overflow:ellipsis}
+.citem .nm small{display:block;color:var(--ink-3);font-family:var(--f-mono);font-size:10px;letter-spacing:.04em}
+.citem .hrs{font-family:var(--f-mono);font-size:11px;color:var(--ink-3)}
+.citem.off .nm{color:var(--ink-3);text-decoration:line-through}
+.group-label{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);margin:12px 0 4px;
+}
+.group-label:first-child{margin-top:0}
+
+/* ── month ──────────────────────────────────────────────── */
+.stage-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.stage-head h2{
+  font-family:var(--f-display);font-weight:400;font-size:22px;margin:0;letter-spacing:-.01em;
+}
+.stage-head h2 .yr{color:var(--ink-3)}
+.nav{display:flex;gap:4px;align-items:center}
+.nav button{
+  width:26px;height:26px;border:1px solid var(--rule);border-radius:var(--r);
+  background:var(--card);display:grid;place-items:center;color:var(--ink-2);font-size:13px;
+}
+.nav button:hover{background:var(--card-2)}
+.spacer{margin-left:auto}
+
+.dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-left:1px solid var(--rule);border-top:1px solid var(--rule)}
+.dow div{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);padding:5px 8px;border-right:1px solid var(--rule);background:var(--card-2);
+}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-left:1px solid var(--rule)}
+.cell{
+  border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  border-top:1px solid var(--rule);margin-top:-1px;
+  min-height:118px;background:var(--card);padding:6px 7px 22px;
+  position:relative;text-align:left;display:flex;flex-direction:column;gap:4px;
+}
+.cell:hover{background:#fff}
+.cell.dim{background:var(--card-2);color:var(--ink-3)}
+.cell.sel{box-shadow:inset 0 0 0 2px var(--ink);z-index:2}
+.cell .dnum{font-family:var(--f-mono);font-size:13px;font-weight:500;line-height:1;position:relative;width:fit-content}
+.cell.dim .dnum{color:var(--ink-3)}
+.seal-ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-4deg);width:27px;height:27px;pointer-events:none}
+.seal-ring circle{fill:none;stroke:var(--seal);stroke-width:1.4;stroke-dasharray:26 3 14 2 20 3;opacity:.85}
+.cell.today .dnum{color:var(--seal)}
+
+.chip{
+  display:flex;align-items:center;gap:5px;font-size:11px;line-height:1.25;
+  padding:2px 5px;border-radius:2px;background:var(--card-2);
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
+.chip .dot{width:5px;height:5px;border-radius:50%;flex:0 0 auto}
+.chip .t{overflow:hidden;text-overflow:ellipsis}
+.chip.ghost{background:transparent;color:var(--ink-3);border:1px dashed var(--rule)}
+.chip time{font-family:var(--f-mono);font-size:10px;color:var(--ink-3);flex:0 0 auto}
+.more{font-family:var(--f-mono);font-size:10px;color:var(--ink-3);padding-left:5px}
+.spine{position:absolute;left:7px;right:7px;bottom:7px;height:4px;display:flex;gap:1.5px}
+.spine i{border-radius:1px;min-width:3px}
+.cell .reflect-mark{position:absolute;right:6px;bottom:14px;width:6px;height:6px;border-radius:50%;background:var(--ink-3);opacity:.5}
+
+/* ── week ───────────────────────────────────────────────── */
+.weekwrap{overflow-x:auto;border:1px solid var(--rule);background:var(--card);border-radius:var(--r)}
+.week{display:grid;grid-template-columns:52px repeat(7,minmax(112px,1fr));min-width:820px}
+.week .hcol{border-right:1px solid var(--rule)}
+.week .whead{
+  padding:6px 8px;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);
+  background:var(--card-2);position:sticky;top:0;z-index:3;
+}
+.week .whead .d{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.week .whead .n{font-family:var(--f-mono);font-size:15px;font-weight:500}
+.week .whead.today .n{color:var(--seal)}
+.week .whead button{text-align:left;width:100%}
+.hours{position:relative;border-right:1px solid var(--rule)}
+.hrow{height:38px;border-bottom:1px dotted var(--rule-soft);position:relative}
+.hlabel{
+  position:absolute;right:6px;top:-7px;font-family:var(--f-mono);font-size:10px;color:var(--ink-3);
+  background:var(--card);padding:0 2px;
+}
+.daycol{position:relative;border-right:1px solid var(--rule)}
+.daycol.today{background:rgba(178,58,38,.03)}
+.block{
+  position:absolute;left:3px;right:3px;border-radius:2px;padding:3px 5px;overflow:hidden;
+  color:#fff;font-size:10.5px;line-height:1.25;text-align:left;
+}
+.block .bt{font-family:var(--f-mono);font-size:9.5px;opacity:.85}
+.block.plan{background:transparent!important;border:1px dashed currentColor;}
+.unsched{border-bottom:1px solid var(--rule);padding:4px;display:flex;flex-direction:column;gap:2px;min-height:26px}
+
+/* ── day page ───────────────────────────────────────────── */
+.daypage{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px}
+.dp-head{display:flex;align-items:baseline;gap:12px;margin-bottom:2px;flex-wrap:wrap}
+.dp-head .big{font-family:var(--f-display);font-size:40px;line-height:1;font-weight:400}
+.dp-head .sub{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.sect{margin-top:20px}
+.sect > h3{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 8px;padding-bottom:5px;border-bottom:1px solid var(--rule);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.entry{
+  display:grid;grid-template-columns:4px auto minmax(0,1fr) auto;gap:10px;align-items:start;
+  padding:9px 10px;background:var(--card);border:1px solid var(--rule-soft);border-radius:var(--r);
+  margin-bottom:6px;
+}
+.entry .stripe{width:4px;align-self:stretch;border-radius:2px;min-height:26px}
+.entry .when{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);padding-top:2px;white-space:nowrap}
+.entry .body .ttl{font-size:13.5px;font-weight:500;line-height:1.35}
+.entry .body .meta{font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.entry .body .note{font-size:12.5px;color:var(--ink-2);margin-top:4px;white-space:pre-wrap}
+.entry .acts{display:flex;gap:4px;align-items:center}
+.entry.planned{background:repeating-linear-gradient(135deg,var(--card),var(--card) 7px,var(--card-2) 7px,var(--card-2) 14px)}
+.pill{
+  font-family:var(--f-mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--rule);border-radius:10px;padding:1px 7px;color:var(--ink-3);white-space:nowrap;
+}
+.empty{
+  border:1px dashed var(--rule);border-radius:var(--r);padding:16px;text-align:center;
+  color:var(--ink-3);font-size:12.5px;background:var(--card-2);
+}
+
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);padding:14px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.field label{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.field input,.field select,.field textarea{
+  border:1px solid var(--rule);border-radius:var(--r);padding:6px 8px;background:#fff;
+  font-size:13px;width:100%;
+}
+.field textarea{resize:vertical;min-height:64px;line-height:1.45}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.hint{font-size:11px;color:var(--ink-3);margin-top:-4px;margin-bottom:10px}
+
+.mood{display:flex;gap:5px}
+.mood button{
+  flex:1;border:1px solid var(--rule);border-radius:var(--r);padding:6px 0;font-size:12px;
+  font-family:var(--f-mono);background:#fff;color:var(--ink-3);
+}
+.mood button[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+
+/* ── review ─────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);padding:12px 14px}
+.stat .n{font-family:var(--f-mono);font-size:26px;font-weight:500;line-height:1}
+.stat .l{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+table.tbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--rule);border-radius:var(--r)}
+table.tbl th{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule);background:var(--card-2);font-weight:500;
+}
+table.tbl td{padding:7px 10px;border-bottom:1px solid var(--rule-soft);font-size:13px;vertical-align:middle}
+table.tbl tr:last-child td{border-bottom:none}
+table.tbl td.num{font-family:var(--f-mono);text-align:right;white-space:nowrap}
+.minibar{height:6px;border-radius:3px;min-width:2px}
+.rangebar{display:flex;gap:6px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+
+/* ── dialog ─────────────────────────────────────────────── */
+dialog{
+  border:1px solid var(--rule);border-radius:var(--r);padding:0;background:var(--card);
+  color:var(--ink);max-width:560px;width:calc(100% - 32px);box-shadow:var(--shadow);
+}
+dialog::backdrop{background:rgba(22,32,43,.42)}
+.dlg-h{
+  padding:14px 18px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px;
+}
+.dlg-h h3{font-family:var(--f-display);font-size:19px;font-weight:400;margin:0}
+.dlg-b{padding:16px 18px;max-height:66vh;overflow:auto}
+.dlg-f{padding:12px 18px;border-top:1px solid var(--rule);display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.typepick{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.typepick button{
+  border:1px solid var(--rule);border-radius:var(--r);padding:8px 10px;text-align:left;background:#fff;
+  display:flex;align-items:center;gap:8px;font-size:12.5px;
+}
+.typepick button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.typepick .sw{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+.schedrow{display:grid;grid-template-columns:1.1fr .9fr .9fr 26px;gap:6px;margin-bottom:6px;align-items:center}
+.toast{
+  position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+  background:var(--ink);color:var(--card);padding:8px 16px;border-radius:var(--r);
+  font-size:12.5px;box-shadow:var(--shadow);z-index:99;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+/* ── responsive ─────────────────────────────────────────── */
+@media (max-width:1040px){
+  .daypage{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  .rail{border-right:none;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .stage{padding:16px 14px 70px}
+  .masthead{padding:12px 14px}
+  .cell{min-height:76px;padding:4px 4px 18px}
+  .cell .chip .t{display:none}
+  .cell .chip time{display:none}
+  .cell .chip{padding:2px;justify-content:center}
+  .brand h1{font-size:21px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{
+  .masthead .viewswitch,.masthead .btn,.rail,.nav,.spacer{display:none!important}
+  .layout{grid-template-columns:1fr}
+  body{background:#fff}
+  .cell{min-height:96px}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="brand">
+    <span class="eyebrow">Well-Being Promotion Office · Hiroshima University</span>
+    <h1>Work Log <em>&amp; Activity Calendar</em></h1>
+  </div>
+  <div class="viewswitch" id="viewswitch">
+    <button data-view="month" aria-pressed="true">Month</button>
+    <button data-view="week" aria-pressed="false">Week</button>
+    <button data-view="day" aria-pressed="false">Day</button>
+    <button data-view="review" aria-pressed="false">Review</button>
+  </div>
+  <button class="btn" id="btnToday">Today</button>
+  <button class="btn btn-solid" id="btnLog">Log activity</button>
+</header>
+
+<div class="layout">
+  <aside class="rail">
+    <div class="rail-sec">
+      <h3 class="rail-h"><span id="tallyScope">This month</span><span class="mono" id="tallyTotal">0h</span></h3>
+      <div class="tally" id="tally"></div>
+    </div>
+    <div class="rail-sec">
+      <h3 class="rail-h">
+        <span>Commitments</span>
+        <button class="btn btn-sm btn-ghost" id="btnAddCommit">+ Add</button>
+      </h3>
+      <div class="clist" id="clist"></div>
+    </div>
+    <div class="rail-sec">
+      <h3 class="rail-h">Data</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button class="btn btn-sm" id="btnExportCsv">Export CSV</button>
+        <button class="btn btn-sm" id="btnExportJson">Backup JSON</button>
+        <button class="btn btn-sm" id="btnImport">Restore</button>
+        <input type="file" id="fileImport" accept="application/json" hidden>
+      </div>
+      <p class="hint" style="margin-top:8px">Saved in this browser. Back up before switching devices.</p>
+    </div>
+  </aside>
+
+  <main class="stage" id="stage"></main>
+</div>
+
+<dialog id="dlgEntry">
+  <form method="dialog" id="formEntry">
+    <div class="dlg-h"><h3 id="entryTitle">Log activity</h3></div>
+    <div class="dlg-b">
+      <div class="field">
+        <label for="eDate">Date</label>
+        <input type="date" id="eDate" required>
+      </div>
+      <div class="field">
+        <label for="eCommit">Commitment</label>
+        <select id="eCommit"></select>
+      </div>
+      <div class="field">
+        <label for="eTitle">What did you do</label>
+        <input type="text" id="eTitle" placeholder="e.g. Session 4 — data screening for HLM" required>
+      </div>
+      <div class="row3">
+        <div class="field"><label for="eStart">Start</label><input type="time" id="eStart"></div>
+        <div class="field"><label for="eEnd">End</label><input type="time" id="eEnd"></div>
+        <div class="field"><label for="eHours">Hours</label><input type="number" id="eHours" step="0.25" min="0" max="24" placeholder="1.5"></div>
+      </div>
+      <p class="hint">Give times for the timetable, or just hours if it was spread across the day.</p>
+      <div class="field">
+        <label for="eStatus">Status</label>
+        <select id="eStatus">
+          <option value="done">Done</option>
+          <option value="planned">Planned</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="eNote">Notes / output</label>
+        <textarea id="eNote" placeholder="Decisions, outputs, follow-ups…"></textarea>
+      </div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" class="btn" id="entryDelete" style="margin-right:auto;display:none">Delete</button>
+      <button type="button" class="btn" data-close>Cancel</button>
+      <button type="submit" class="btn btn-solid">Save entry</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgCommit">
+  <form method="dialog" id="formCommit">
+    <div class="dlg-h"><h3 id="commitTitle">Add commitment</h3></div>
+    <div class="dlg-b">
+      <div class="field">
+        <label>Type</label>
+        <div class="typepick" id="typepick"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="cName">Name</label><input type="text" id="cName" required placeholder="Inclusive Education Policy"></div>
+        <div class="field"><label for="cCode">Short code</label><input type="text" id="cCode" maxlength="12" placeholder="IEP"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="cFrom">Runs from</label><input type="date" id="cFrom"></div>
+        <div class="field"><label for="cTo">Runs to</label><input type="date" id="cTo"></div>
+      </div>
+      <div class="field" style="margin-bottom:6px"><label>Weekly schedule</label></div>
+      <div id="schedRows"></div>
+      <button type="button" class="btn btn-sm" id="btnAddSched">+ Add weekly slot</button>
+      <p class="hint" style="margin-top:8px">Slots appear on the calendar as planned blocks. Tick them off on the day page.</p>
+      <div class="field" style="margin-top:10px">
+        <label for="cNote">Note</label>
+        <input type="text" id="cNote" placeholder="Funder, co-instructor, partner…">
+      </div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" class="btn" id="commitArchive" style="margin-right:auto;display:none">Archive</button>
+      <button type="button" class="btn" data-close>Cancel</button>
+      <button type="submit" class="btn btn-solid">Save commitment</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ═══ constants ═══════════════════════════════════════════ */
+const TYPES = [
+  {id:"course",   label:"Courses",     one:"Course",             color:"var(--c-course)",   hex:"#2c6b8a"},
+  {id:"research", label:"Research",    one:"Research project",   color:"var(--c-research)", hex:"#7b3f6e"},
+  {id:"training", label:"Training",    one:"Training project",   color:"var(--c-training)", hex:"#a05f1d"},
+  {id:"pd",       label:"Development", one:"Professional development", color:"var(--c-pd)", hex:"#3c6a45"}
+];
+const TYPE = Object.fromEntries(TYPES.map(t=>[t.id,t]));
+const DOW  = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAY_START = 8, DAY_END = 21, HOUR_PX = 38;
+const KEY = "wbpo-worklog-v1";
+
+/* ═══ storage (Claude artifact storage, else localStorage) ═ */
+const store = {
+  async get(k){
+    if (window.storage && typeof window.storage.get === "function"){
+      try{ const r = await window.storage.get(k); return r ? r.value : null; }catch(e){ return null; }
+    }
+    try{ return localStorage.getItem(k); }catch(e){ return null; }
+  },
+  async set(k,v){
+    if (window.storage && typeof window.storage.set === "function"){
+      try{ await window.storage.set(k,v); return true; }catch(e){ /* fall through */ }
+    }
+    try{ localStorage.setItem(k,v); return true; }catch(e){ return false; }
+  }
+};
+
+/* ═══ date utils ══════════════════════════════════════════ */
+const pad = n => String(n).padStart(2,"0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+const mondayOf = d => addDays(d, -((d.getDay()+6)%7));
+const isoDow = d => (d.getDay()+6)%7;                 // 0 = Monday
+const todayIso = () => iso(new Date());
+function prettyDate(s){
+  const d = parse(s);
+  const names = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  return `${names[isoDow(d)]} · ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+const t2m = t => { if(!t) return null; const [h,m]=t.split(":").map(Number); return h*60+m; };
+const m2t = m => `${pad(Math.floor(m/60))}:${pad(m%60)}`;
+const fmtH = h => (Math.round(h*100)/100).toFixed(h % 1 === 0 ? 0 : (Math.round(h*100)%10===0?1:2)).replace(/\.00$/,"");
+const uid = () => Math.random().toString(36).slice(2,10);
+
+/* ═══ state ═══════════════════════════════════════════════ */
+let S = { version:1, commitments:[], entries:[], reflections:{} };
+let view = "month";
+let cursor = new Date();          // month/week anchor
+let selected = todayIso();        // day page
+let range = "month";              // review range
+let editingEntry = null, editingCommit = null, pickedType = "research";
+
+/* ═══ starter data ════════════════════════════════════════ */
+function starter(){
+  const c = (type,name,code,note,sched) => ({id:uid(),type,name,code,note:note||"",schedule:sched||[],from:"",to:"",active:true});
+  return {
+    version:1,
+    commitments:[
+      c("course","Inclusion and Exclusion in Society","INC","Certificate programme lecture series",[{d:2,s:"10:30",e:"12:00"}]),
+      c("course","Cultivating a Caring and Inclusive Society for All","e-START","International online course",[{d:4,s:"16:00",e:"17:30"}]),
+      c("research","Teacher & Student Well-Being Instruments","TWBS","Quantitative scales + qualitative interview guides"),
+      c("research","Cambodia PLP Evaluation","PLP","World Bank / MoEYS — multilevel SEM"),
+      c("research","AI Literacy & Ethics among Japanese Teachers","ELSI","ELSI Hiroshima research activity support"),
+      c("research","VR-READY","VR","KAKENHI Kiban A — VR pre-service teacher preparation, Cambodia"),
+      c("training","Indonesia Inclusive Education Partnership","DoSEaSET","Kemendikdasmen — ToT curriculum & MoA"),
+      c("training","Indonesia STEM Microcredential","STEM","Five-day online training programme"),
+      c("training","NISE Cambodia Capacity Building","NISE","IN–ON–IN hybrid programme under HU–NISE MOU"),
+      c("pd","Editorial & Peer Review","REVIEW","CJED, Cambodian Education Review, IJIE"),
+      c("pd","Grant Writing & Fellowships","GRANTS","KAKENHI, JSPS, visiting fellowships"),
+      c("pd","Conferences & Seminars","CONF","")
+    ],
+    entries:[], reflections:{}
+  };
+}
+
+/* ═══ persistence ═════════════════════════════════════════ */
+let saveTimer = null;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{ await store.set(KEY, JSON.stringify(S)); }, 200);
+}
+async function load(){
+  const raw = await store.get(KEY);
+  if (raw){ try{ const p = JSON.parse(raw); if (p && p.commitments) { S = Object.assign({version:1,commitments:[],entries:[],reflections:{}}, p); return; } }catch(e){} }
+  S = starter(); save();
+}
+
+/* ═══ derived ═════════════════════════════════════════════ */
+const byId = id => S.commitments.find(c=>c.id===id);
+function entriesOn(date){
+  return S.entries.filter(e=>e.date===date).sort((a,b)=>{
+    const A=t2m(a.start), B=t2m(b.start);
+    if(A===null&&B===null) return 0; if(A===null) return 1; if(B===null) return -1; return A-B;
+  });
+}
+function occurrencesOn(date){
+  const d = parse(date), dw = isoDow(d), out = [];
+  for (const c of S.commitments){
+    if (c.active === false) continue;
+    if (c.from && date < c.from) continue;
+    if (c.to   && date > c.to)   continue;
+    (c.schedule||[]).forEach((sl,i)=>{
+      if (sl.d !== dw) return;
+      const key = `${c.id}#${date}#${i}`;
+      if (S.entries.some(e=>e.occ===key)) return;   // already logged
+      out.push({occ:key, commitmentId:c.id, date, start:sl.s, end:sl.e, title:c.name, type:c.type, ghost:true});
+    });
+  }
+  return out.sort((a,b)=>t2m(a.start)-t2m(b.start));
+}
+function hoursOf(e){
+  if (typeof e.hours === "number" && e.hours > 0) return e.hours;
+  const a=t2m(e.start), b=t2m(e.end);
+  if (a!==null && b!==null && b>a) return (b-a)/60;
+  return 0;
+}
+function typeOf(e){ const c = byId(e.commitmentId); return c ? c.type : (e.type || "pd"); }
+function totalsByType(list){
+  const t = {course:0,research:0,training:0,pd:0};
+  list.forEach(e=>{ if(e.status!=="planned") t[typeOf(e)] += hoursOf(e); });
+  return t;
+}
+function rangeDates(){
+  const now = new Date();
+  if (range === "month"){ const s=new Date(cursor.getFullYear(),cursor.getMonth(),1), e=new Date(cursor.getFullYear(),cursor.getMonth()+1,0); return [iso(s),iso(e)]; }
+  if (range === "week"){ const s=mondayOf(cursor); return [iso(s),iso(addDays(s,6))]; }
+  if (range === "90"){ return [iso(addDays(now,-89)), iso(now)]; }
+  return ["0000-01-01","9999-12-31"];
+}
+function entriesInRange(){
+  const [a,b] = rangeDates();
+  return S.entries.filter(e=>e.date>=a && e.date<=b);
+}
+
+/* ═══ render: rail ════════════════════════════════════════ */
+function renderRail(){
+  const [a,b] = (view==="review") ? rangeDates() : [iso(new Date(cursor.getFullYear(),cursor.getMonth(),1)), iso(new Date(cursor.getFullYear(),cursor.getMonth()+1,0))];
+  const list = S.entries.filter(e=>e.date>=a&&e.date<=b);
+  const t = totalsByType(list);
+  const total = Object.values(t).reduce((x,y)=>x+y,0);
+  const max = Math.max(...Object.values(t), 1);
+  document.getElementById("tallyScope").textContent =
+    view==="review" ? ({month:"This month",week:"This week","90":"Last 90 days",all:"All time"})[range] : `${MONTHS[cursor.getMonth()]} ${cursor.getFullYear()}`;
+  document.getElementById("tallyTotal").textContent = fmtH(total)+"h";
+  document.getElementById("tally").innerHTML = TYPES.map(ty=>`
+    <div class="tally-row">
+      <span class="label" style="color:${ty.hex}">${ty.label}</span>
+      <span class="val">${fmtH(t[ty.id])}h</span>
+      <span class="track"><span class="fill" style="width:${(t[ty.id]/max*100).toFixed(1)}%;background:${ty.hex}"></span></span>
+    </div>`).join("");
+
+  const hoursPer = {};
+  list.forEach(e=>{ if(e.status!=="planned") hoursPer[e.commitmentId]=(hoursPer[e.commitmentId]||0)+hoursOf(e); });
+  let html = "";
+  for (const ty of TYPES){
+    const items = S.commitments.filter(c=>c.type===ty.id);
+    if (!items.length) continue;
+    html += `<div class="group-label">${ty.label}</div>`;
+    html += items.map(c=>`
+      <button class="citem ${c.active===false?"off":""}" data-commit="${c.id}" title="Edit ${esc(c.name)}">
+        <span class="bar" style="background:${ty.hex}"></span>
+        <span class="nm">${esc(c.name)}${c.code?`<small>${esc(c.code)}</small>`:""}</span>
+        <span class="hrs">${hoursPer[c.id]?fmtH(hoursPer[c.id])+"h":""}</span>
+      </button>`).join("");
+  }
+  document.getElementById("clist").innerHTML = html || `<p class="hint">No commitments yet.</p>`;
+}
+
+/* ═══ render: month ═══════════════════════════════════════ */
+function renderMonth(){
+  const y=cursor.getFullYear(), m=cursor.getMonth();
+  const first=new Date(y,m,1), start=mondayOf(first);
+  const last=new Date(y,m+1,0), end=addDays(mondayOf(last),6);
+  const cells=[];
+  for(let d=new Date(start); d<=end; d=addDays(d,1)) cells.push(iso(d));
+
+  const grid = cells.map(ds=>{
+    const d=parse(ds), dim=d.getMonth()!==m, isToday=ds===todayIso();
+    const es=entriesOn(ds), occ=occurrencesOn(ds);
+    const all=[...es,...occ].slice(0,3);
+    const extra=(es.length+occ.length)-all.length;
+    const t=totalsByType(es);
+    const tot=Object.values(t).reduce((x,y)=>x+y,0);
+    const spine = tot>0 ? `<span class="spine">${TYPES.filter(ty=>t[ty.id]>0).map(ty=>`<i style="flex:${t[ty.id]};background:${ty.hex}"></i>`).join("")}</span>` : "";
+    return `<button class="cell ${dim?"dim":""} ${isToday?"today":""} ${ds===selected?"sel":""}" data-date="${ds}">
+      <span class="dnum">${isToday?`<svg class="seal-ring" viewBox="0 0 30 30"><circle cx="15" cy="15" r="12.4"/></svg>`:""}${d.getDate()}</span>
+      ${all.map(e=>chipHtml(e)).join("")}
+      ${extra>0?`<span class="more">+${extra} more</span>`:""}
+      ${S.reflections[ds]?`<span class="reflect-mark" title="Reflection written"></span>`:""}
+      ${spine}
+    </button>`;
+  }).join("");
+
+  return `
+  <div class="stage-head">
+    <div class="nav">
+      <button id="prev" aria-label="Previous month">‹</button>
+      <button id="next" aria-label="Next month">›</button>
+    </div>
+    <h2>${MONTHS[m]} <span class="yr mono">${y}</span></h2>
+    <span class="spacer"></span>
+    <button class="btn btn-sm" onclick="window.print()">Print</button>
+  </div>
+  <div class="dow">${DOW.map(d=>`<div>${d}</div>`).join("")}</div>
+  <div class="grid">${grid}</div>`;
+}
+function chipHtml(e){
+  const c=byId(e.commitmentId), ty=TYPE[typeOf(e)]||TYPE.pd;
+  const ghost = e.ghost || e.status==="planned";
+  return `<span class="chip ${ghost?"ghost":""}">
+    <span class="dot" style="background:${ty.hex}"></span>
+    ${e.start?`<time>${e.start}</time>`:""}
+    <span class="t">${esc(e.title || (c?c.name:"Activity"))}</span>
+  </span>`;
+}
+
+/* ═══ render: week ════════════════════════════════════════ */
+function renderWeek(){
+  const start=mondayOf(cursor);
+  const days=[...Array(7)].map((_,i)=>iso(addDays(start,i)));
+  const rows=[...Array(DAY_END-DAY_START)].map((_,i)=>
+    `<div class="hrow"><span class="hlabel mono">${pad(DAY_START+i)}:00</span></div>`).join("");
+
+  const cols=days.map(ds=>{
+    const isToday=ds===todayIso();
+    const items=[...entriesOn(ds),...occurrencesOn(ds)];
+    const timed=items.filter(e=>e.start&&(e.end||hoursOf(e)>0));
+    const untimed=items.filter(e=>!(e.start&&(e.end||hoursOf(e)>0)));
+    const blocks=timed.map(e=>{
+      const s=t2m(e.start);
+      const en=e.end?t2m(e.end):s+hoursOf(e)*60;
+      const top=((s-DAY_START*60)/60)*HOUR_PX;
+      const h=Math.max(((en-s)/60)*HOUR_PX-2,17);
+      const ty=TYPE[typeOf(e)]||TYPE.pd;
+      const ghost=e.ghost||e.status==="planned";
+      return `<button class="block ${ghost?"plan":""}" data-open="${e.occ||e.id}" data-date="${ds}"
+        style="top:${top}px;height:${h}px;background:${ty.hex};${ghost?`color:${ty.hex}`:""}">
+        <span class="bt">${e.start}${e.end?"–"+e.end:""}</span><br>${esc(e.title||"")}
+      </button>`;
+    }).join("");
+    return `<div class="hcol">
+      <div class="whead ${isToday?"today":""}"><button data-date="${ds}"><span class="d">${DOW[isoDow(parse(ds))]}</span><br><span class="n">${parse(ds).getDate()}</span></button></div>
+      <div class="unsched">${untimed.map(e=>chipHtml(e)).join("")}</div>
+      <div class="daycol ${isToday?"today":""}" data-date="${ds}" style="height:${(DAY_END-DAY_START)*HOUR_PX}px">${rows}${blocks}</div>
+    </div>`;
+  }).join("");
+
+  return `
+  <div class="stage-head">
+    <div class="nav"><button id="prev" aria-label="Previous week">‹</button><button id="next" aria-label="Next week">›</button></div>
+    <h2>Week of ${parse(days[0]).getDate()} ${MONTHS[parse(days[0]).getMonth()]} <span class="yr mono">${parse(days[0]).getFullYear()}</span></h2>
+  </div>
+  <div class="weekwrap"><div class="week">
+    <div class="hcol"><div class="whead"><span class="d">Time</span></div><div class="unsched"></div><div class="hours" style="height:${(DAY_END-DAY_START)*HOUR_PX}px">${rows}</div></div>
+    ${cols}
+  </div></div>`;
+}
+
+/* ═══ render: day page ════════════════════════════════════ */
+function renderDay(){
+  const ds=selected, es=entriesOn(ds), occ=occurrencesOn(ds);
+  const t=totalsByType(es), tot=Object.values(t).reduce((x,y)=>x+y,0);
+  const r=S.reflections[ds]||{text:"",energy:0};
+
+  const entryRow=e=>{
+    const c=byId(e.commitmentId), ty=TYPE[typeOf(e)]||TYPE.pd, h=hoursOf(e);
+    return `<div class="entry ${e.status==="planned"?"planned":""}">
+      <span class="stripe" style="background:${ty.hex}"></span>
+      <span class="when">${e.start?`${e.start}${e.end?"–"+e.end:""}`:"—"}<br>${h?fmtH(h)+"h":""}</span>
+      <span class="body">
+        <span class="ttl">${esc(e.title)}</span>
+        <span class="meta">${c?esc(c.name):"Unassigned"} · ${ty.one}</span>
+        ${e.note?`<span class="note">${esc(e.note)}</span>`:""}
+      </span>
+      <span class="acts">
+        ${e.status==="planned"?`<span class="pill">Planned</span>`:""}
+        <button class="btn btn-sm btn-ghost" data-edit="${e.id}">Edit</button>
+      </span>
+    </div>`;
+  };
+  const occRow=o=>{
+    const c=byId(o.commitmentId), ty=TYPE[c.type];
+    return `<div class="entry planned">
+      <span class="stripe" style="background:${ty.hex}"></span>
+      <span class="when">${o.start}–${o.end}</span>
+      <span class="body"><span class="ttl">${esc(c.name)}</span><span class="meta">Scheduled ${ty.one.toLowerCase()}</span></span>
+      <span class="acts">
+        <button class="btn btn-sm" data-confirm="${o.occ}">Mark done</button>
+        <button class="btn btn-sm btn-ghost" data-skip="${o.occ}">Skip</button>
+      </span>
+    </div>`;
+  };
+
+  return `
+  <div class="stage-head">
+    <div class="nav"><button id="prev" aria-label="Previous day">‹</button><button id="next" aria-label="Next day">›</button></div>
+    <span class="spacer"></span>
+    <button class="btn btn-sm btn-solid" id="dayAdd">+ Add entry</button>
+  </div>
+  <div class="daypage">
+    <div>
+      <div class="dp-head">
+        <span class="big mono">${parse(ds).getDate()}</span>
+        <span>
+          <span class="sub">${prettyDate(ds)}</span><br>
+          <span class="mono" style="font-size:12px;color:var(--ink-2)">${fmtH(tot)} hours logged · ${es.filter(e=>e.status!=="planned").length} entries</span>
+        </span>
+      </div>
+
+      ${occ.length?`<div class="sect"><h3>On the schedule</h3>${occ.map(occRow).join("")}</div>`:""}
+
+      <div class="sect">
+        <h3><span>Logged</span><span class="mono">${fmtH(tot)}h</span></h3>
+        ${es.length?es.map(entryRow).join(""):`<div class="empty">Nothing logged yet. Add an entry, or tick off a scheduled block above.</div>`}
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <div class="field"><label>How was the day</label>
+          <div class="mood" id="mood">
+            ${[1,2,3,4,5].map(n=>`<button type="button" data-energy="${n}" aria-pressed="${r.energy===n}">${n}</button>`).join("")}
+          </div>
+        </div>
+        <div class="field">
+          <label for="reflect">Reflection</label>
+          <textarea id="reflect" placeholder="What moved forward, what got stuck, what to carry into tomorrow.">${esc(r.text||"")}</textarea>
+        </div>
+        <button class="btn btn-solid" id="saveReflect" style="width:100%">Save reflection</button>
+      </div>
+
+      <div class="panel" style="margin-top:12px">
+        <h3 class="rail-h" style="margin-bottom:10px">Balance today</h3>
+        <div class="tally">
+          ${TYPES.map(ty=>`<div class="tally-row">
+            <span class="label" style="color:${ty.hex}">${ty.label}</span>
+            <span class="val">${fmtH(t[ty.id])}h</span>
+            <span class="track"><span class="fill" style="width:${tot?(t[ty.id]/tot*100).toFixed(1):0}%;background:${ty.hex}"></span></span>
+          </div>`).join("")}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══ render: review ══════════════════════════════════════ */
+function renderReview(){
+  const list=entriesInRange().filter(e=>e.status!=="planned");
+  const t=totalsByType(list), tot=Object.values(t).reduce((x,y)=>x+y,0);
+  const days=new Set(list.map(e=>e.date));
+  const [a,b]=rangeDates();
+
+  const perCommit=S.commitments.map(c=>{
+    const sub=list.filter(e=>e.commitmentId===c.id);
+    const h=sub.reduce((s,e)=>s+hoursOf(e),0);
+    return {c,h,n:sub.length};
+  }).filter(x=>x.h>0).sort((x,y)=>y.h-x.h);
+  const maxH=perCommit.length?perCommit[0].h:1;
+
+  // streak of consecutive logged days ending today
+  let streak=0; let d=new Date();
+  while(days.has(iso(d))){ streak++; d=addDays(d,-1); }
+
+  return `
+  <div class="stage-head">
+    <h2>Review</h2>
+    <span class="spacer"></span>
+    <button class="btn btn-sm" id="btnExportCsv2">Export CSV</button>
+  </div>
+  <div class="rangebar">
+    ${[["week","This week"],["month","This month"],["90","Last 90 days"],["all","All time"]].map(([k,l])=>
+      `<button class="btn btn-sm ${range===k?"btn-solid":""}" data-range="${k}">${l}</button>`).join("")}
+    <span class="mono" style="font-size:11px;color:var(--ink-3);margin-left:6px">${range==="all"?"everything":a+" → "+b}</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="n">${fmtH(tot)}</div><div class="l">Hours logged</div></div>
+    <div class="stat"><div class="n">${list.length}</div><div class="l">Entries</div></div>
+    <div class="stat"><div class="n">${days.size}</div><div class="l">Active days</div></div>
+    <div class="stat"><div class="n">${days.size?fmtH(tot/days.size):0}</div><div class="l">Hours / active day</div></div>
+    <div class="stat"><div class="n">${streak}</div><div class="l">Day streak</div></div>
+  </div>
+
+  <div class="sect"><h3>Where the time went</h3>
+    <table class="tbl">
+      <thead><tr><th>Category</th><th style="width:44%">Share</th><th style="text-align:right">Hours</th><th style="text-align:right">Share</th></tr></thead>
+      <tbody>
+        ${TYPES.map(ty=>`<tr>
+          <td style="color:${ty.hex};font-weight:500">${ty.label}</td>
+          <td><span class="minibar" style="display:block;width:${tot?(t[ty.id]/tot*100).toFixed(1):0}%;background:${ty.hex}"></span></td>
+          <td class="num">${fmtH(t[ty.id])}</td>
+          <td class="num">${tot?Math.round(t[ty.id]/tot*100):0}%</td>
+        </tr>`).join("")}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sect"><h3>By commitment</h3>
+    ${perCommit.length?`<table class="tbl">
+      <thead><tr><th>Commitment</th><th>Type</th><th style="width:30%"></th><th style="text-align:right">Entries</th><th style="text-align:right">Hours</th></tr></thead>
+      <tbody>
+        ${perCommit.map(({c,h,n})=>`<tr>
+          <td>${esc(c.name)}${c.code?` <span class="mono" style="color:var(--ink-3);font-size:11px">${esc(c.code)}</span>`:""}</td>
+          <td style="color:${TYPE[c.type].hex};font-size:12px">${TYPE[c.type].label}</td>
+          <td><span class="minibar" style="display:block;width:${(h/maxH*100).toFixed(1)}%;background:${TYPE[c.type].hex}"></span></td>
+          <td class="num">${n}</td>
+          <td class="num">${fmtH(h)}</td>
+        </tr>`).join("")}
+      </tbody></table>`:`<div class="empty">No hours in this range yet.</div>`}
+  </div>
+
+  <div class="sect"><h3>Reflections in range</h3>
+    ${Object.keys(S.reflections).filter(k=>k>=a&&k<=b&&(S.reflections[k].text||"").trim()).sort().reverse().slice(0,12).map(k=>`
+      <div class="entry"><span class="stripe" style="background:var(--ink-3)"></span>
+        <span class="when">${k}</span>
+        <span class="body"><span class="note" style="margin-top:0">${esc(S.reflections[k].text)}</span></span>
+        <span class="acts">${S.reflections[k].energy?`<span class="pill">Day ${S.reflections[k].energy}/5</span>`:""}</span>
+      </div>`).join("") || `<div class="empty">No reflections written in this range.</div>`}
+  </div>`;
+}
+
+/* ═══ render root ═════════════════════════════════════════ */
+function render(){
+  const stage=document.getElementById("stage");
+  stage.innerHTML = view==="month"?renderMonth() : view==="week"?renderWeek() : view==="day"?renderDay() : renderReview();
+  document.querySelectorAll("#viewswitch button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.view===view)));
+  renderRail();
+  wireStage();
+}
+function esc(s){ return String(s??"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+/* ═══ stage wiring ════════════════════════════════════════ */
+function wireStage(){
+  const prev=document.getElementById("prev"), next=document.getElementById("next");
+  if(prev) prev.onclick=()=>shift(-1);
+  if(next) next.onclick=()=>shift(1);
+
+  document.querySelectorAll(".cell[data-date]").forEach(el=>{
+    el.onclick=()=>{ selected=el.dataset.date; view="day"; render(); };
+  });
+  document.querySelectorAll(".whead button[data-date], .daycol[data-date]").forEach(el=>{
+    el.onclick=(ev)=>{ if(ev.target.closest(".block")) return; selected=el.dataset.date; view="day"; render(); };
+  });
+  document.querySelectorAll(".block[data-open]").forEach(el=>{
+    el.onclick=(ev)=>{ ev.stopPropagation(); selected=el.dataset.date; view="day"; render(); };
+  });
+  document.querySelectorAll("[data-edit]").forEach(el=>{ el.onclick=()=>openEntry(el.dataset.edit); });
+  document.querySelectorAll("[data-confirm]").forEach(el=>{ el.onclick=()=>confirmOcc(el.dataset.confirm); });
+  document.querySelectorAll("[data-skip]").forEach(el=>{ el.onclick=()=>skipOcc(el.dataset.skip); });
+  document.querySelectorAll("[data-range]").forEach(el=>{ el.onclick=()=>{ range=el.dataset.range; render(); }; });
+
+  const add=document.getElementById("dayAdd"); if(add) add.onclick=()=>openEntry(null,selected);
+  const csv2=document.getElementById("btnExportCsv2"); if(csv2) csv2.onclick=exportCsv;
+
+  const mood=document.getElementById("mood");
+  if(mood) mood.querySelectorAll("button").forEach(b=>{
+    b.onclick=()=>{ const n=Number(b.dataset.energy);
+      const r=S.reflections[selected]||{text:"",energy:0};
+      r.energy = r.energy===n?0:n;
+      S.reflections[selected]=r; save(); render(); };
+  });
+  const sr=document.getElementById("saveReflect");
+  if(sr) sr.onclick=()=>{
+    const txt=document.getElementById("reflect").value;
+    const r=S.reflections[selected]||{text:"",energy:0};
+    r.text=txt;
+    if(!txt.trim() && !r.energy) delete S.reflections[selected]; else S.reflections[selected]=r;
+    save(); toast("Reflection saved"); render();
+  };
+}
+function shift(n){
+  if(view==="month") cursor=new Date(cursor.getFullYear(),cursor.getMonth()+n,1);
+  else if(view==="week") cursor=addDays(cursor,7*n);
+  else if(view==="day"){ selected=iso(addDays(parse(selected),n)); cursor=parse(selected); }
+  render();
+}
+
+/* ═══ scheduled occurrence → entry ════════════════════════ */
+function confirmOcc(key){
+  const [cid,date,i]=key.split("#");
+  const c=byId(cid); if(!c) return;
+  const sl=c.schedule[Number(i)];
+  S.entries.push({id:uid(),occ:key,date,commitmentId:cid,title:c.name,start:sl.s,end:sl.e,hours:0,status:"done",note:""});
+  save(); render(); toast("Marked done");
+}
+function skipOcc(key){
+  const [cid,date,i]=key.split("#");
+  const c=byId(cid); if(!c) return;
+  const sl=c.schedule[Number(i)];
+  S.entries.push({id:uid(),occ:key,date,commitmentId:cid,title:c.name+" — not held",start:sl.s,end:sl.e,hours:0,status:"planned",note:"Skipped"});
+  save(); render(); toast("Marked as not held");
+}
+
+/* ═══ entry dialog ════════════════════════════════════════ */
+const dlgEntry=document.getElementById("dlgEntry");
+function commitOptions(sel){
+  let h=`<option value="">— Unassigned —</option>`;
+  for(const ty of TYPES){
+    const items=S.commitments.filter(c=>c.type===ty.id && c.active!==false);
+    if(!items.length) continue;
+    h+=`<optgroup label="${ty.label}">`+items.map(c=>`<option value="${c.id}" ${sel===c.id?"selected":""}>${esc(c.name)}</option>`).join("")+`</optgroup>`;
+  }
+  return h;
+}
+function openEntry(id, date){
+  editingEntry = id ? S.entries.find(e=>e.id===id) : null;
+  const e = editingEntry || {};
+  document.getElementById("entryTitle").textContent = editingEntry ? "Edit entry" : "Log activity";
+  document.getElementById("eDate").value  = e.date || date || selected || todayIso();
+  document.getElementById("eCommit").innerHTML = commitOptions(e.commitmentId);
+  document.getElementById("eTitle").value = e.title || "";
+  document.getElementById("eStart").value = e.start || "";
+  document.getElementById("eEnd").value   = e.end   || "";
+  document.getElementById("eHours").value = e.hours || "";
+  document.getElementById("eStatus").value= e.status|| "done";
+  document.getElementById("eNote").value  = e.note  || "";
+  document.getElementById("entryDelete").style.display = editingEntry ? "" : "none";
+  dlgEntry.showModal();
+  setTimeout(()=>document.getElementById("eTitle").focus(),40);
+}
+document.getElementById("eCommit").addEventListener("change", ev=>{
+  const ti=document.getElementById("eTitle");
+  const c=byId(ev.target.value);
+  if(c && !ti.value.trim()) ti.value=c.name;
+});
+document.getElementById("formEntry").addEventListener("submit", ev=>{
+  ev.preventDefault();
+  const data={
+    date:document.getElementById("eDate").value,
+    commitmentId:document.getElementById("eCommit").value||null,
+    title:document.getElementById("eTitle").value.trim(),
+    start:document.getElementById("eStart").value||"",
+    end:document.getElementById("eEnd").value||"",
+    hours:parseFloat(document.getElementById("eHours").value)||0,
+    status:document.getElementById("eStatus").value,
+    note:document.getElementById("eNote").value.trim()
+  };
+  if(editingEntry) Object.assign(editingEntry,data);
+  else S.entries.push(Object.assign({id:uid(),occ:null},data));
+  save(); dlgEntry.close(); selected=data.date; render(); toast(editingEntry?"Entry updated":"Entry saved");
+  editingEntry=null;
+});
+document.getElementById("entryDelete").onclick=()=>{
+  if(!editingEntry) return;
+  S.entries=S.entries.filter(x=>x.id!==editingEntry.id);
+  editingEntry=null; save(); dlgEntry.close(); render(); toast("Entry deleted");
+};
+
+/* ═══ commitment dialog ═══════════════════════════════════ */
+const dlgCommit=document.getElementById("dlgCommit");
+function renderTypePick(){
+  document.getElementById("typepick").innerHTML = TYPES.map(ty=>
+    `<button type="button" data-type="${ty.id}" aria-pressed="${pickedType===ty.id}">
+      <span class="sw" style="background:${ty.hex}"></span>${ty.one}</button>`).join("");
+  document.querySelectorAll("#typepick button").forEach(b=>{
+    b.onclick=()=>{ pickedType=b.dataset.type; renderTypePick(); };
+  });
+}
+function schedRow(sl){
+  const d=sl?sl.d:0, s=sl?sl.s:"10:30", e=sl?sl.e:"12:00";
+  const div=document.createElement("div");
+  div.className="schedrow";
+  div.innerHTML=`
+    <select class="sd">${DOW.map((n,i)=>`<option value="${i}" ${i===d?"selected":""}>${n}</option>`).join("")}</select>
+    <input type="time" class="ss" value="${s}">
+    <input type="time" class="se" value="${e}">
+    <button type="button" class="btn btn-sm btn-ghost" title="Remove slot">✕</button>`;
+  div.querySelector("button").onclick=()=>div.remove();
+  return div;
+}
+function openCommit(id){
+  editingCommit = id ? byId(id) : null;
+  const c = editingCommit || {};
+  pickedType = c.type || "research";
+  document.getElementById("commitTitle").textContent = editingCommit ? "Edit commitment" : "Add commitment";
+  renderTypePick();
+  document.getElementById("cName").value=c.name||"";
+  document.getElementById("cCode").value=c.code||"";
+  document.getElementById("cFrom").value=c.from||"";
+  document.getElementById("cTo").value=c.to||"";
+  document.getElementById("cNote").value=c.note||"";
+  const rows=document.getElementById("schedRows"); rows.innerHTML="";
+  (c.schedule||[]).forEach(sl=>rows.appendChild(schedRow(sl)));
+  const arch=document.getElementById("commitArchive");
+  arch.style.display = editingCommit ? "" : "none";
+  arch.textContent = (editingCommit && editingCommit.active===false) ? "Restore" : "Archive";
+  dlgCommit.showModal();
+}
+document.getElementById("btnAddSched").onclick=()=>document.getElementById("schedRows").appendChild(schedRow());
+document.getElementById("commitArchive").onclick=()=>{
+  if(!editingCommit) return;
+  editingCommit.active = editingCommit.active===false;
+  save(); dlgCommit.close(); render();
+  toast(editingCommit.active?"Restored":"Archived — past entries kept");
+  editingCommit=null;
+};
+document.getElementById("formCommit").addEventListener("submit", ev=>{
+  ev.preventDefault();
+  const schedule=[...document.querySelectorAll("#schedRows .schedrow")].map(r=>({
+    d:Number(r.querySelector(".sd").value),
+    s:r.querySelector(".ss").value,
+    e:r.querySelector(".se").value
+  })).filter(x=>x.s&&x.e);
+  const data={
+    type:pickedType,
+    name:document.getElementById("cName").value.trim(),
+    code:document.getElementById("cCode").value.trim(),
+    from:document.getElementById("cFrom").value,
+    to:document.getElementById("cTo").value,
+    note:document.getElementById("cNote").value.trim(),
+    schedule
+  };
+  if(editingCommit) Object.assign(editingCommit,data);
+  else S.commitments.push(Object.assign({id:uid(),active:true},data));
+  save(); dlgCommit.close(); render(); toast(editingCommit?"Commitment updated":"Commitment added");
+  editingCommit=null;
+});
+
+/* ═══ export / import ═════════════════════════════════════ */
+function download(name, text, mime){
+  const b=new Blob([text],{type:mime});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function exportCsv(){
+  const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  const rows=[["Date","Weekday","Category","Commitment","Code","Activity","Start","End","Hours","Status","Notes"]];
+  [...S.entries].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+    const c=byId(e.commitmentId), ty=TYPE[typeOf(e)];
+    rows.push([e.date,DOW[isoDow(parse(e.date))],ty.one,c?c.name:"Unassigned",c?c.code:"",e.title,e.start,e.end,fmtH(hoursOf(e)),e.status,e.note]);
+  });
+  Object.keys(S.reflections).sort().forEach(k=>{
+    const r=S.reflections[k];
+    if(!(r.text||"").trim() && !r.energy) return;
+    rows.push([k,DOW[isoDow(parse(k))],"Reflection","","","Daily reflection","","","",r.energy?`day ${r.energy}/5`:"",r.text]);
+  });
+  download(`work-log-${todayIso()}.csv`, "\ufeff"+rows.map(r=>r.map(q).join(",")).join("\r\n"), "text/csv;charset=utf-8");
+  toast("CSV exported");
+}
+document.getElementById("btnExportCsv").onclick=exportCsv;
+document.getElementById("btnExportJson").onclick=()=>{
+  download(`work-log-backup-${todayIso()}.json`, JSON.stringify(S,null,2), "application/json");
+  toast("Backup downloaded");
+};
+document.getElementById("btnImport").onclick=()=>document.getElementById("fileImport").click();
+document.getElementById("fileImport").addEventListener("change", ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const p=JSON.parse(rd.result);
+      if(!p||!Array.isArray(p.commitments)) throw new Error("bad shape");
+      S=Object.assign({version:1,commitments:[],entries:[],reflections:{}},p);
+      save(); render(); toast("Backup restored");
+    }catch(err){ toast("That file isn't a work-log backup"); }
+    ev.target.value="";
+  };
+  rd.readAsText(f);
+});
+
+/* ═══ chrome wiring ═══════════════════════════════════════ */
+document.querySelectorAll("#viewswitch button").forEach(b=>{
+  b.onclick=()=>{ view=b.dataset.view; render(); };
+});
+document.getElementById("btnToday").onclick=()=>{ cursor=new Date(); selected=todayIso(); render(); };
+document.getElementById("btnLog").onclick=()=>openEntry(null, selected);
+document.getElementById("btnAddCommit").onclick=()=>openCommit(null);
+document.getElementById("clist").addEventListener("click", ev=>{
+  const b=ev.target.closest("[data-commit]"); if(b) openCommit(b.dataset.commit);
+});
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>b.closest("dialog").close());
+
+let toastTimer=null;
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg; el.classList.add("on");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("on"),1900);
+}
+
+document.addEventListener("keydown", ev=>{
+  if(document.querySelector("dialog[open]")) return;
+  const tag=(ev.target.tagName||"").toLowerCase();
+  if(tag==="input"||tag==="textarea"||tag==="select") return;
+  if(ev.key==="n"){ ev.preventDefault(); openEntry(null,selected); }
+  else if(ev.key==="t"){ cursor=new Date(); selected=todayIso(); render(); }
+  else if(ev.key==="ArrowLeft") shift(-1);
+  else if(ev.key==="ArrowRight") shift(1);
+  else if(["1","2","3","4"].includes(ev.key)){ view=["month","week","day","review"][Number(ev.key)-1]; render(); }
+});
+
+/* ═══ go ══════════════════════════════════════════════════ */
+load().then(render);
+</script>
+</body>
+</html>
